@@ -1,0 +1,56 @@
+Package: OneClickCartographics
+Type: Package
+Title: OneClickCartographics: Automated Publication-Grade Cartography for Biodiversity Science
+Version: 1.0.0
+Authors@R: c(person("Anonymous", "Author", role = c("aut", "cre"), email = "anonymous@peer-review.org"))
+Author: Anonymous Author [aut, cre]
+Maintainer: Anonymous Author <anonymous@peer-review.org>
+Description: Automated, publication-ready cartography and biodiversity distribution
+    mapping from species occurrence tables or scientific names with a single
+    function call. Features zero-configuration clean minimalist defaults, direct GBIF
+    taxonomic queries, automated coordinate quality cleaning (filtering Null Island,
+    inverted coordinates, and placeholder artifacts), and IUCN Red List Criterion B
+    range metrics (Extent of Occurrence [EOO] and Area of Occupancy [AOO]) with
+    intelligent habitat-boundary constraints (excluding unsuitable marine or terrestrial
+    areas). Provides distinct taxonomic type specimen highlighting (Holotypes, Syntypes),
+    multi-species comparative faceted plates, dual-metric equal-area grid aggregation
+    (species richness and record density with white-to-red stepped scales and 1-pixel
+    continuous contours), and journal dimension presets for major publishers (Zootaxa,
+    Pensoft/ZooKeys, Nature, PLOS, Elsevier, Wiley). Also includes modular layer
+    construction, interactive Leaflet web maps with hover tooltips, and automated
+    Materials and Methods prose and BibTeX citation generation.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Depends: R (>= 4.1)
+LazyData: true
+Imports:
+    elevatr,
+    ggnewscale,
+    ggplot2,
+    ggspatial,
+    htmltools,
+    htmlwidgets,
+    jsonlite,
+    leaflet,
+    patchwork,
+    RColorBrewer,
+    readxl,
+    rlang,
+    rnaturalearth,
+    rnaturalearthdata,
+    sf,
+    terra,
+    tools,
+    utils,
+    viridis,
+    wdpar
+Suggests:
+    geodata,
+    knitr,
+    miniUI,
+    rmarkdown,
+    shiny,
+    testthat (>= 3.0.0)
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+RoxygenNote: 7.3.3

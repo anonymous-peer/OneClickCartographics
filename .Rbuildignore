@@ -1,0 +1,10 @@
+^\.DS_Store$
+\.DS_Store$
+^\.gitignore$
+^\.github$
+^\.Rhistory$
+^\.RData$
+^LICENSE\.md$
+^_pkgdown\.yml$
+^OneClickCartographics_[0-9.]*\.tar\.gz$
+^OneClickCartographics\.Rcheck$

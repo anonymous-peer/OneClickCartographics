@@ -1,0 +1,279 @@
+---
+title: "Mapping biodiversity with OneClickCartographics"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Mapping biodiversity with OneClickCartographics}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE, purl = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE,
+  purl = FALSE
+)
+```
+
+OneClickCartographics turns a plain occurrence table (species, latitude,
+longitude) into a publication-ready distribution map with a single function
+call. The map scale adapts automatically to the extent of your points, from
+micro-local to global.
+
+## The minimalistic default map
+
+A CSV or Excel file with at least three columns -- species (or any grouping
+column), latitude and longitude -- is all you need:
+
+```{r, eval = FALSE, purl = FALSE}
+library(OneClickCartographics)
+run_map("my_localities.csv")
+```
+
+Alternatively, you can query GBIF directly by providing a scientific name:
+
+```{r, eval = FALSE, purl = FALSE}
+run_map("Panthera onca", journal = "zootaxa")
+```
+
+Every run writes an HTML report (`00_map_report.html`) formatted in the signature Orangutan-R HTML style next to the maps, recording map thumbnails, input data, records, projection, scale tier, base layers, and reproducible Materials & Methods prose with BibTeX citations.
+
+## Automatic scale selection
+
+The extent of the points decides the cartographic style:
+
+* **Local** (span <= 300 km): Natural Earth 1:10m layers, UTM projection,
+  populated places and roads on.
+* **Regional** (300-3,000 km): 1:50m layers, UTM projection.
+* **Continental** (3,000-8,000 km): 1:50m layers, Lambert Azimuthal
+  Equal-Area projection centered on the data.
+* **Global** (> 8,000 km or dateline-crossing): 1:110m layers, World
+  Equidistant Cylindrical (EPSG:4087); the antimeridian is handled
+  automatically for Pacific species.
+
+You can always override the automatic choice:
+
+```{r, eval = FALSE, purl = FALSE}
+run_map("my_localities.csv", scale = 10, projection = 32614)
+```
+
+## Multiple species
+
+With two or more groups in the colour column, each group is drawn with a
+distinct colour **and** shape combination, with a single combined legend.
+Scientific names are automatically italicized in the legend:
+
+```{r, eval = FALSE, purl = FALSE}
+run_map("several_species.csv")
+```
+
+Use `color_by` to group by any other column (population, year, museum...) and
+`shape_by` to map an additional column to point shapes.
+
+## Colour palettes
+
+The default palette is Okabe-Ito (colour-blind safe). You can use viridis,
+RColorBrewer, or a custom set of colours:
+
+```{r, eval = FALSE, purl = FALSE}
+# viridis palettes
+run_map("my_localities.csv", palette = "viridis")
+run_map("my_localities.csv", palette = "magma")
+
+# RColorBrewer palettes
+run_map("my_localities.csv", palette = "Set1")
+run_map("my_localities.csv", palette = "Paired")
+
+# custom hex colours
+run_map("my_localities.csv", palette = c("#FF0000", "#00FF00", "#0000FF"))
+
+# from a file (one hex colour per line)
+run_map("my_localities.csv", palette = "my_colours.txt")
+```
+
+## Legend position
+
+Control where the legend appears on the map:
+
+```{r, eval = FALSE, purl = FALSE}
+run_map("my_localities.csv", legend_position = "right")
+run_map("my_localities.csv", legend_position = "left")
+run_map("my_localities.csv", legend_position = "none")  # hide legend
+```
+
+## GIS export
+
+Export occurrence points (and optional density grid) as GIS vector files:
+
+```{r, eval = FALSE, purl = FALSE}
+# shapefile
+run_map("my_localities.csv", gis_formats = "shp")
+
+# GeoPackage and GeoJSON
+run_map("my_localities.csv", gis_formats = c("gpkg", "geojson"))
+
+# with density grid
+run_map("my_localities.csv", grid_km = 25, gis_formats = "gpkg")
+```
+
+Output files are saved to the output directory as `{filename}_points.{ext}`
+and `{filename}_grid.{ext}`.
+
+## Grid analysis
+
+The density grid can be limited to a custom bounding box and exported as a CSV
+with per-species counts:
+
+```{r, eval = FALSE, purl = FALSE}
+# Full-extent grid with 25 km cells
+run_map("my_localities.csv", grid_km = 25)
+
+# Grid limited to a specific region
+run_map("my_localities.csv", grid_km = 25,
+        grid_bbox = c(-100, -80, 30, 45))
+
+# Export grid counts (per-species and total) to CSV
+run_map("my_localities.csv", grid_km = 25, grid_csv = TRUE)
+```
+
+The output `grid_counts.csv` contains columns: `grid_id`, `lon_center`,
+`lat_center` (cell centre coordinates in the projected CRS), `total`, and one
+column per species with the count of records in that cell.
+
+## Graticule control
+
+The graticule can be toggled off entirely or shown as full lines instead of
+tick-only labels:
+
+```{r, eval = FALSE, purl = FALSE}
+# No graticule at all
+run_map("my_localities.csv", graticule = FALSE)
+
+# Full graticule lines (above points)
+run_map("my_localities.csv", graticule_lines = TRUE)
+```
+
+When `graticule = TRUE` (default), only axis tick labels are shown. Set
+`graticule_lines = TRUE` to draw full coordinate lines across the map. Lines
+are drawn as the topmost layer, above points and grids.
+
+## Optional layers to understand biodiversity
+
+All optional layers are off by default and skip gracefully when unavailable
+(no internet, missing suggested packages).
+
+Altitude map (SRTM elevation with a terrain colour scale):
+
+```{r, eval = FALSE, purl = FALSE}
+run_map("my_localities.csv", show_elevation = TRUE)
+```
+
+Land + ocean topography (ETOPO1 global relief, elevation and bathymetry in
+one two-sided scale; downloaded once and cached):
+
+```{r, eval = FALSE, purl = FALSE}
+run_map("my_localities.csv", show_topo = TRUE)
+```
+
+WWF terrestrial ecoregions (thin outlines under the points; downloaded once
+and cached):
+
+```{r, eval = FALSE, purl = FALSE}
+run_map("my_localities.csv", show_ecoregions = TRUE)
+```
+
+Density grid (records per square cell; the points themselves are never
+modified, `show_points = FALSE` hides them):
+
+```{r, eval = FALSE, purl = FALSE}
+run_map("dense_download.csv", grid_km = 25)
+```
+
+## Advanced biodiversity features
+
+### Direct GBIF querying
+
+You can query occurrence records directly from GBIF by providing a scientific binomial:
+
+```{r, eval = FALSE, purl = FALSE}
+run_map("Panthera onca", journal = "zootaxa", preset = "2col")
+```
+
+### Automated coordinate quality cleaning
+
+Flag and drop problematic coordinates (Null Island, inverted lat/lon, placeholder grids):
+
+```{r, eval = FALSE, purl = FALSE}
+run_map("my_localities.csv", clean_coords = TRUE)
+```
+
+### IUCN Red List Range Assessment (Criterion B)
+
+Calculate Extent of Occurrence (EOO) and Area of Occupancy (AOO) with automated habitat constraints:
+
+```{r, eval = FALSE, purl = FALSE}
+run_map("my_localities.csv",
+        iucn = TRUE,
+        show_eoo = TRUE,
+        iucn_medium = "land")
+```
+
+### Highlighting taxonomic type specimens
+
+Emphasize Holotypes and Syntypes with prominent gold diamond markers:
+
+```{r, eval = FALSE, purl = FALSE}
+run_map("taxonomic_sample.csv", highlight_type = TRUE)
+```
+
+### Journal dimension presets
+
+Format maps to exact publisher guidelines:
+
+```{r, eval = FALSE, purl = FALSE}
+run_map("my_localities.csv", journal = "zootaxa", preset = "2col")
+run_map("my_localities.csv", journal = "pensoft", preset = "1col")
+run_map("my_localities.csv", journal = "nature", preset = "1.5col")
+```
+
+### Multi-species comparative plates
+
+Facet multi-species occurrences into a single standardized plate:
+
+```{r, eval = FALSE, purl = FALSE}
+run_map("multi_species.csv", facet = TRUE, facet_by = "species", facet_cols = 2)
+```
+
+### Interactive web cartography
+
+Inspect distribution data with interactive hover tooltips and popups:
+
+```{r, eval = FALSE, purl = FALSE}
+interactive_map("my_localities.csv", color_by = "species")
+```
+
+## Cartographic details
+
+* Scale bar, north arrow and graticule are added by default.
+* An optional inset locator map (`inset_map = TRUE`, requires `patchwork`).
+* PDF, PNG and SVG output at your choice of resolution.
+* Base layers: Natural Earth (public domain).
+
+## Data requirements
+
+* Input: `.csv`, `.tsv`, `.txt`, `.xlsx` or `.xls`.
+* Columns: a species/grouping column, latitude and longitude. Latitude is
+  taken from `lat`, `latitude` or `decimalLatitude`; longitude from `lon`,
+  `long`, `longitude` or `decimalLongitude`.
+* Optional columns: `typeStatus` / `type_status` for taxonomic highlighting.
+* Rows with missing or out-of-range coordinates are dropped with a warning.
+* The points are plotted as given unless `clean_coords = TRUE` is explicitly enabled.
+
+## Citation
+
+```text
+Anonymous Authors (2026). One-Click Cartographics: 
+Automated Publication-Grade Cartography for Biodiversity Science. 
+R package version 1.0.0. https://github.com/anonymous-peer/OneClickCartographics
+```

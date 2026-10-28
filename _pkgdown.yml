@@ -1,0 +1,13 @@
+url: https://anonymous-peer.github.io/OneClickCartographics/
+template:
+  bootstrap: 5
+  bootswatch: flatly
+
+reference:
+  - title: Mapping
+    contents:
+      - run_map
+articles:
+  - title: Guides
+    contents:
+      - mapping-biodiversity

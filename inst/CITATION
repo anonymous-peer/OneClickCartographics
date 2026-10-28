@@ -1,0 +1,8 @@
+bibentry(
+  bibtype = "Manual",
+  title = "OneClickCartographics: Automated Publication-Grade Cartography for Biodiversity Science",
+  author = "Anonymous Authors",
+  year = "2026",
+  note = "R package version 1.0.0 (blinded for double-anonymous peer review)",
+  url = "https://github.com/anonymous-peer/OneClickCartographics"
+)
